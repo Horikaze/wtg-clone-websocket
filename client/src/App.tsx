@@ -1,12 +1,12 @@
 import Player from "./components/Player";
-import Users from "./components/Users";
+import RightPanel from "./components/RightPanel";
 
 function App() {
   return (
     <>
-      <div className="flex flex-row gap-2 justify-between">
-        <Users />
+      <div className="flex flex-row justify-between">
         <Player />
+        <RightPanel />
       </div>
     </>
   );
