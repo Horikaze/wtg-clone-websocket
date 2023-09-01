@@ -1,23 +1,40 @@
 const express = require("express");
-const app = express(); // Correct the typo here
-const http = require("http").createServer(app); // Create an HTTP server
-const io = require("socket.io")(http); // Correct the typo here
+const app = express();
+const http = require("http");
+const { Server } = require("socket.io");
+const cors = require("cors");
 
-app.get("/", (req, res) => {
-  res.send("Working");
+app.use(cors());
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
 });
+
+let URL = "";
+let isPlaying = false;
+let time = 0;
 
 io.on("connection", (socket) => {
-  socket.on("join_room", (data) => {
-    socket.join(data);
-  });
+  console.log(`User Connected: ${socket.id}`);
 
-  socket.on("send_message", (data) => {
-    socket.to(data.room).emit("receive_message", data);
-    console.log(data);
+  socket.on("change", (data) => {
+    URL = data.URL;
+    isPlaying = data.playing;
+    time = data.currentTime;
+    console.log(URL, isPlaying, time);
+    socket.broadcast.emit("recive", {
+      URL,
+      isPlaying,
+      time,
+    });
   });
 });
 
-http.listen(3001, () => {
-  console.log("server is running");
+server.listen(3001, () => {
+  console.log("SERVER IS RUNNING");
 });

@@ -1,16 +1,24 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
+import io from "socket.io-client";
+const socket = io("http://localhost:3001/", { transports: ["websocket"] });
+
+const formatTime = (time: number) => {
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+};
+
 export default function Player() {
   const player = useRef<ReactPlayer>(null);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(false);
   const [URL, setURL] = useState("");
   const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  
+
   // const togglePlay = () => {
   //   setPlaying((prevPlaying) => !prevPlaying);
   // };
-
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
@@ -18,12 +26,20 @@ export default function Player() {
     player.current?.seekTo(newTime);
   };
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
-
+  useEffect(() => {
+    socket.emit("change", {
+      playing,
+      URL,
+      currentTime,
+    });
+  }, [playing, URL]);
+  useEffect(() => {
+    socket.on("recive", (data) => {
+      player.current?.seekTo(data.time);
+      setURL(data.URL);
+      setPlaying(data.isPlaying);
+    });
+  }, []);
   return (
     <div className="w-full">
       <div className="aspect-video">
@@ -34,6 +50,12 @@ export default function Player() {
           controls
           url={URL}
           playing={playing}
+          onError={(e) => {
+            console.log(e);
+          }}
+          onPause={() => {
+            setPlaying(false);
+          }}
           onPlay={() => {
             setPlaying(true);
           }}
@@ -66,8 +88,7 @@ export default function Player() {
             />
             <button
               className="absolute right-0 p-2 bg-gray-500 hover:brightness-125 text-white"
-              onClick={() => {
-              }}
+              onClick={() => {}}
             >
               Meow
             </button>

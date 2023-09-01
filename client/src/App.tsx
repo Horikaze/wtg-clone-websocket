@@ -6,7 +6,7 @@ function App() {
     <>
       <div className="flex flex-row justify-between">
         <Player />
-        <RightPanel />
+        {/* <RightPanel /> */}
       </div>
     </>
   );
