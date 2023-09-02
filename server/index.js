@@ -21,12 +21,12 @@ let time = 0;
 
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
-
   socket.on("change", (data) => {
     URL = data.URL;
     isPlaying = data.playing;
     time = data.currentTime;
-    console.log(URL, isPlaying, time);
+    id = data.id;
+    console.log(time, data.currentTime);
     socket.broadcast.emit("recive", {
       URL,
       isPlaying,
