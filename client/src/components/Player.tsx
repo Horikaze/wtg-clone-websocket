@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import io from "socket.io-client";
-const socket = io("http://localhost:3001/", { transports: ["websocket"] });
+const socket = io(`${import.meta.env.VITE_WEBSOCKET}`, {
+  transports: ["websocket"],
+});
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
@@ -21,9 +23,8 @@ export default function Player() {
   const [duration, setDuration] = useState<number | null>(null);
 
   const handlePauseChange = () => {
-    setPlaying(true)
     socket.emit("change", {
-      playing: playingInput,
+      playing: !playingInput,
       URL: URLinput,
       currentTime: currentTime,
       id: socket.id,
@@ -33,7 +34,7 @@ export default function Player() {
     const newTime = parseFloat(e.target.value);
     setCurrentTime(newTime);
     player.current?.seekTo(newTime);
-    setPlaying(true)
+    setPlaying(true);
     socket.emit("change", {
       playing: true,
       URL: URLinput,
@@ -46,7 +47,7 @@ export default function Player() {
       player.current?.seekTo(data.time);
       setCurrentTime(data.time);
       setURL(data.URL);
-      setURLinput(data.URL)
+      setURLinput(data.URL);
       setPlaying(data.isPlaying);
       setPlayingInput(data.isPlaying);
     });
@@ -58,7 +59,7 @@ export default function Player() {
           width="100%"
           height="100%"
           ref={player}
-          controls={false}
+          controls
           url={URL}
           playing={playing}
           onError={(e) => {
@@ -66,6 +67,9 @@ export default function Player() {
           }}
           onPause={() => {}}
           onPlay={() => {}}
+          onBufferEnd={() => {
+            setPlaying(true);
+          }}
           onDuration={(duration) => {
             setDuration(duration);
           }}
@@ -100,7 +104,7 @@ export default function Player() {
             }}
             className="text-white"
           >
-            {playingInput ? "Play" : "Pause"}
+            {!playingInput ? "Play" : "Pause"}
           </button>
           <div className="text-gray-300">
             <p>

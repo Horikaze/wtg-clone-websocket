@@ -15,9 +15,9 @@ const io = new Server(server, {
   },
 });
 
-let URL = "";
-let isPlaying = false;
-let time = 0;
+// let URL = "";
+// let isPlaying = false;
+// let time = 0;
 
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
