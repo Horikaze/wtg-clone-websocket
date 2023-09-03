@@ -1,5 +1,5 @@
 import Player from "./components/Player";
-import RightPanel from "./components/RightPanel";
+// import RightPanel from "./components/RightPanel";
 
 function App() {
   return (
