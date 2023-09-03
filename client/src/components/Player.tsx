@@ -13,26 +13,42 @@ export default function Player() {
   const player = useRef<ReactPlayer>(null);
   const [playing, setPlaying] = useState(false);
   const [URL, setURL] = useState("");
-  const [URLinput, setURLinput] = useState("");
-  const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
 
-  const handleChange = (playing: boolean) => {
-    console.log(playing, URL, currentTime);
-    setPlaying(playing);
+  const [playingInput, setPlayingInput] = useState(false);
+  const [URLinput, setURLinput] = useState("");
+
+  const [duration, setDuration] = useState<number | null>(null);
+
+  const handlePauseChange = () => {
+    setPlaying(true)
     socket.emit("change", {
-      playing: playing,
-      URL,
-      currentTime,
+      playing: playingInput,
+      URL: URLinput,
+      currentTime: currentTime,
       id: socket.id,
     });
   };
-
+  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = parseFloat(e.target.value);
+    setCurrentTime(newTime);
+    player.current?.seekTo(newTime);
+    setPlaying(true)
+    socket.emit("change", {
+      playing: true,
+      URL: URLinput,
+      currentTime: newTime,
+      id: socket.id,
+    });
+  };
   useEffect(() => {
     socket.on("recive", (data) => {
       player.current?.seekTo(data.time);
+      setCurrentTime(data.time);
       setURL(data.URL);
+      setURLinput(data.URL)
       setPlaying(data.isPlaying);
+      setPlayingInput(data.isPlaying);
     });
   }, []);
   return (
@@ -42,18 +58,14 @@ export default function Player() {
           width="100%"
           height="100%"
           ref={player}
-          controls
+          controls={false}
           url={URL}
           playing={playing}
           onError={(e) => {
             console.log(e);
           }}
-          onPause={() => {
-            handleChange(false);
-          }}
-          onPlay={() => {
-            handleChange(true);
-          }}
+          onPause={() => {}}
+          onPlay={() => {}}
           onDuration={(duration) => {
             setDuration(duration);
           }}
@@ -82,12 +94,30 @@ export default function Player() {
               Meow
             </button>
           </div>
+          <button
+            onClick={() => {
+              handlePauseChange();
+            }}
+            className="text-white"
+          >
+            {playingInput ? "Play" : "Pause"}
+          </button>
           <div className="text-gray-300">
             <p>
               {formatTime(currentTime)} / {formatTime(duration || 0)}
             </p>
           </div>
         </div>
+      </div>
+      <div className="my-2 mx-2">
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          value={currentTime}
+          onChange={handleSeekChange}
+          className="appearance-none  w-full bg-transparent [&::-webkit-slider-runnable-track]:rounded-sm [&::-webkit-slider-runnable-track]:bg-black/30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:h-[20px] [&::-webkit-slider-thumb]:w-[10px] [&::-webkit-slider-thumb]:rounded-sm [&::-webkit-slider-thumb]:bg-white"
+        />
       </div>
     </div>
   );

@@ -26,7 +26,7 @@ io.on("connection", (socket) => {
     isPlaying = data.playing;
     time = data.currentTime;
     id = data.id;
-    console.log(time, data.currentTime);
+    console.log(URL, isPlaying, time, id);
     socket.broadcast.emit("recive", {
       URL,
       isPlaying,
