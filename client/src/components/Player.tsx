@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import io from "socket.io-client";
-const socket = io(`${import.meta.env.VITE_WEBSOCKET}`, {
-  transports: ["websocket"],
-});
+const socket = io(`${import.meta.env.VITE_WEBSOCKET}`);
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
